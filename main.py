@@ -16,11 +16,11 @@ def collinear(p1, p2, p3):
     print((p2[1] - p1[1])*(p3[0] - p2[0]))
     return approx((p3[1] - p2[1])*(p2[0] - p1[0]),  (p2[1] - p1[1])*(p3[0] - p2[0]))
 '''
-def approx(a, b, pc=0.1): 
+def approx(a, b, pc=0.125): 
     return abs(a - b) < pc*abs(a + b)
 
-def in_range(x, a, b, pc=1.):
-    return a*(1.-pc/100) <= x and x <= b*(1.+pc/100)
+def in_range(x, a, b, pc=0.05):
+    return a*(1.-pc) <= x and x <= b*(1.+pc)
 
 def angle(p1, p2, p3): # angle between p1-p2 and p1-p3
     res = abs(math.degrees(math.atan2(p3[1] - p1[1], p3[0] - p1[0]) - math.atan2(p2[1] - p1[1], p2[0] - p1[0])))
@@ -108,7 +108,7 @@ def get_posture_shape(height, width, results):
     if approx(left_arm_angle, 120.) and approx(right_arm_angle, 120.) and in_range(legs_angle, 40, 60):
         return "star"
     
-    if in_range(left_arm_angle, 50., 80.) and in_range(right_arm_angle, 50., 80.) and in_range(legs_angle, 0., 20):
+    if in_range(left_arm_angle, 60., 100.) and in_range(right_arm_angle, 60., 100.) and in_range(legs_angle, 0., 20):
         return "stick"
 
 
@@ -172,7 +172,8 @@ while(True):
         match = pos_shape == "stick"
 
     cv2.putText(shape_pic, "Your score: " + str(score), (shape_pic.shape[0] - 300, 50), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 0), 3)
-    if time.time() - start_time >= wait_secs*math.exp(-score/15):
+    if time.time() - start_time >= wait_secs:
+        #wait_secs*math.exp(-score/15)
         if match:
             score += 1 
             cv2.putText(shape_pic, "CORRECT!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 100, 0), 3)
