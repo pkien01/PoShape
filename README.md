@@ -4,7 +4,7 @@ A fun stretching/exercising game where our posture has to match the shape displa
 
 To use please clone this git repo, install the necessary libraries (numpy, opencv, mediapipe), and run the file ```main.py```.
 
-Youtube demo: https://www.youtube.com/watch?v=onojqSB3V78 
+Youtube demo: https://www.youtube.com/watch?v=VuhPzvfu52Y
 
 Let me know how you think of it or any feedback that you would like to give!
 
