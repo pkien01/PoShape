@@ -1,6 +1,6 @@
 # PoShape
 
-A fun exercising game where our posture has to match the shape displayed on screen!
+A fun stretching/exercising game where our posture has to match the shape displayed on screen! 
 
 To use please clone this git repo, and install the necessary libraries (numpy, opencv, mediapipe).
 
