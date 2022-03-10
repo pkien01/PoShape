@@ -16,10 +16,10 @@ def collinear(p1, p2, p3):
     print((p2[1] - p1[1])*(p3[0] - p2[0]))
     return approx((p3[1] - p2[1])*(p2[0] - p1[0]),  (p2[1] - p1[1])*(p3[0] - p2[0]))
 '''
-def approx(a, b, pc=0.125): 
+def approx(a, b, pc=0.05): 
     return abs(a - b) < pc*abs(a + b)
 
-def in_range(x, a, b, pc=0.05):
+def in_range(x, a, b, pc=0.01):
     return a*(1.-pc) <= x and x <= b*(1.+pc)
 
 def angle(p1, p2, p3): # angle between p1-p2 and p1-p3
@@ -99,7 +99,7 @@ def get_posture_shape(height, width, results):
     if approx(left_arm_angle, 180.) and approx(right_arm_angle, 180.) and in_range(legs_angle, 40, 60):
         return "square"
     
-    if in_range(left_arm_angle, 50., 80.) and in_range(right_arm_angle, 50., 80.) and in_range(legs_angle, 40, 60):
+    if in_range(left_arm_angle, 50., 80.) and in_range(right_arm_angle, 60., 80.) and in_range(legs_angle, 40, 60):
         return "triangle_up"
     
     if approx(left_arm_angle, 180.) and approx(right_arm_angle, 180.) and in_range(legs_angle, 0., 20.):
@@ -114,7 +114,7 @@ def get_posture_shape(height, width, results):
 
 def draw_pose(image):
     height, width, _ = image.shape
-    pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+    pose = mp_pose.Pose(model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
     results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
@@ -126,13 +126,23 @@ def draw_pose(image):
 
     return cv2.resize(image, (250, height*250//width)), pos
 
-
+def centerText(img, text, color, font, fontScale, thickness):
+    textSize = cv2.getTextSize(text, font, fontScale, thickness)[0]
+    textX = (img.shape[1] - textSize[0]) // 2
+    textY = (img.shape[0] + textSize[1]) // 2
+    return cv2.putText(img, text, (textX, textY), font, fontScale, color, thickness)
+#Updates:
+#indicate when user is out of screen or has error
+# Life system. 10 lives (lose 1 every incorrect response)
+# Faster as game progress
+# Animation/more visual feedback (green screen/title popping up)
 
 cap = cv2.VideoCapture(0)
 chosen_shape = random.randint(0, 4)
 start_time = time.time()
 wait_secs = 10.
 score = 0
+
 while(True):
     _, frame = cap.read()
     #cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
@@ -172,17 +182,19 @@ while(True):
         match = pos_shape == "stick"
 
     cv2.putText(shape_pic, "Your score: " + str(score), (shape_pic.shape[0] - 300, 50), cv2.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 0), 3)
-    if time.time() - start_time >= wait_secs:
-        #wait_secs*math.exp(-score/15)
+        
+    if match or time.time() - start_time >= max(1, math.ceil(math.exp(-score/15)*wait_secs)):
         if match:
             score += 1 
-            cv2.putText(shape_pic, "CORRECT!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 100, 0), 3)
-        else: cv2.putText(shape_pic, "WRONG!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 139), 3)
+            centerText(shape_pic, "CORRECT!", (0, 100, 0), cv2.FONT_HERSHEY_SIMPLEX, 6.0, 10)
+        else: 
+            centerText(shape_pic, "WRONG!", (0, 0, 139), cv2.FONT_HERSHEY_SIMPLEX, 6.0, 10)
 
         time.sleep(1)
         start_time = time.time()
 
         chosen_shape = random.randint(0, 4)
+    
 
     #cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
     #cv2.resizeWindow('Camera', (2000, shape_pic.shape[1] * 2000 // shape_pic.shape[0]))
